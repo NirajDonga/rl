@@ -2,6 +2,7 @@ package limiter
 
 import (
 	"context"
+	_ "embed"
 	"time"
 
 	"github.com/redis/go-redis/v9"

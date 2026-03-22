@@ -1,0 +1,19 @@
+# Local environment values
+.env
+
+# Go build outputs
+bin/
+dist/
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Editor files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
