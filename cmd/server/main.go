@@ -14,7 +14,6 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// rateLimiterServer implements the protobuf interface pb.RateLimiterServiceServer
 type rateLimiterServer struct {
 	// Embedding this is required by the generated gRPC code for forward compatibility
 	pb.UnimplementedRateLimiterServiceServer
@@ -24,7 +23,6 @@ type rateLimiterServer struct {
 	// We will add fixedWindow and slidingWindow here in the future
 }
 
-// IsAllowed is the actual RPC method called by the network clients
 func (s *rateLimiterServer) IsAllowed(ctx context.Context, req *pb.IsAllowedRequest) (*pb.IsAllowedResponse, error) {
 	if req.Key == "" {
 		return nil, status.Error(codes.InvalidArgument, "rate limit key is required")

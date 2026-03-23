@@ -5,7 +5,7 @@ import (
 	"time"
 
 	pb "github.com/NirajDonga/rl/api/ratelimit/v1"
-	"github.com/NirajDonga/rl/internal/store/lua" // Import the new lua package
+	"github.com/NirajDonga/rl/internal/store/lua"
 	"github.com/redis/go-redis/v9"
 )
 
