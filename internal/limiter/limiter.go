@@ -1,13 +1,12 @@
 package limiter
 
-import "context"
+import (
+	"context"
 
-type RateRequest struct {
-	Key      string
-	Limit    int64
-	Windowms int64
-}
+	pb "github.com/NirajDonga/rl/api/ratelimit/v1" // Import the generated code
+)
 
 type RateLimiter interface {
-	Allow(ctx context.Context, req RateRequest) (bool, error)
+	// Notice we now return *pb.IsAllowedResponse
+	Allow(ctx context.Context, req *pb.IsAllowedRequest) (*pb.IsAllowedResponse, error)
 }

@@ -2,46 +2,43 @@ package limiter
 
 import (
 	"context"
-	_ "embed"
 	"time"
 
+	pb "github.com/NirajDonga/rl/api/ratelimit/v1"
+	"github.com/NirajDonga/rl/internal/store/lua" // Import the new lua package
 	"github.com/redis/go-redis/v9"
 )
 
-var tokenBucketLua string
-
-// TokenBucket implements the RateLimiter interface using the token bucket algorithm.
 type TokenBucket struct {
 	client *redis.Client
 	script *redis.Script
 }
 
-// NewTokenBucket initializes the token bucket limiter.
 func NewTokenBucket(client *redis.Client) *TokenBucket {
 	return &TokenBucket{
 		client: client,
-		script: redis.NewScript(tokenBucketLua),
+		// Use the exported string from the lua package
+		script: redis.NewScript(lua.TokenBucket),
 	}
 }
 
-// Allow executes the specific token bucket logic in Redis.
-func (tb *TokenBucket) Allow(ctx context.Context, req RateRequest) (bool, error) {
-	// 1. Construct the keys specific to the token bucket algorithm
+func (tb *TokenBucket) Allow(ctx context.Context, req *pb.IsAllowedRequest) (*pb.IsAllowedResponse, error) {
 	tokensKey := req.Key + ":tokens"
 	tsKey := req.Key + ":ts"
 
 	nowMs := time.Now().UnixMilli()
-
 	keys := []string{tokensKey, tsKey}
 
-	// 2. These arguments map exactly to ARGV[1], ARGV[2], ARGV[3] in token_bucket.lua
-	args := []interface{}{req.Limit, req.Windowms, nowMs}
+	args := []interface{}{req.Limit, req.WindowMs, nowMs}
 
 	result, err := tb.script.Run(ctx, tb.client, keys, args...).Result()
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 
 	allowed := result.(int64) == 1
-	return allowed, nil
+
+	return &pb.IsAllowedResponse{
+		Allowed: allowed,
+	}, nil
 }
