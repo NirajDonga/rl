@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	pb "github.com/NirajDonga/rl/api/ratelimit/v1"
 	"github.com/NirajDonga/rl/internal/store/lua"
 	"github.com/redis/go-redis/v9"
 )
@@ -17,18 +16,18 @@ type TokenBucket struct {
 func NewTokenBucket(client *redis.Client) *TokenBucket {
 	return &TokenBucket{
 		client: client,
-		// Use the exported string from the lua package
 		script: redis.NewScript(lua.TokenBucket),
 	}
 }
 
-func (tb *TokenBucket) Allow(ctx context.Context, req *pb.IsAllowedRequest) (*pb.IsAllowedResponse, error) {
+func (tb *TokenBucket) Allow(ctx context.Context, req *RateRequest) (*RateResponse, error) {
 	tokensKey := req.Key + ":tokens"
 	tsKey := req.Key + ":ts"
 
 	nowMs := time.Now().UnixMilli()
 	keys := []string{tokensKey, tsKey}
 
+	// Read Limit and WindowMs from the standard Go struct
 	args := []interface{}{req.Limit, req.WindowMs, nowMs}
 
 	result, err := tb.script.Run(ctx, tb.client, keys, args...).Result()
@@ -38,7 +37,7 @@ func (tb *TokenBucket) Allow(ctx context.Context, req *pb.IsAllowedRequest) (*pb
 
 	allowed := result.(int64) == 1
 
-	return &pb.IsAllowedResponse{
+	return &RateResponse{
 		Allowed: allowed,
 	}, nil
 }

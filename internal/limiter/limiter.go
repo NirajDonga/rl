@@ -1,11 +1,20 @@
 package limiter
 
-import (
-	"context"
+import "context"
 
-	pb "github.com/NirajDonga/rl/api/ratelimit/v1"
-)
+// RateRequest represents the incoming JSON payload
+type RateRequest struct {
+	Key       string `json:"key"`
+	Limit     int64  `json:"limit"`
+	WindowMs  int64  `json:"window_ms"`
+	Algorithm string `json:"algorithm"`
+}
+
+// RateResponse represents the outgoing JSON payload
+type RateResponse struct {
+	Allowed bool `json:"allowed"`
+}
 
 type RateLimiter interface {
-	Allow(ctx context.Context, req *pb.IsAllowedRequest) (*pb.IsAllowedResponse, error)
+	Allow(ctx context.Context, req *RateRequest) (*RateResponse, error)
 }
